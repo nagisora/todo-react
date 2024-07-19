@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import './App.css'
 
 function App() {
@@ -16,37 +16,34 @@ function App() {
   const [isIncomplete, setIsIncomplete] = useState(false);
 
   const onChangeStudySession = (event) => setStudySession(event.target.value);
-  const onChangeStudyTime = (event) => setStudyTime(event.target.value);
+  const onChangeStudyTime = (event) => setStudyTime(parseFloat(event.target.value) || 0); // 数値変換
 
   const onClickSubmit = () => {
     // エラーハンドリング
     const isFormIncomplete = studySession === "" || studyTime <= 0;
     setIsIncomplete(isFormIncomplete);
-    if(isFormIncomplete) return;
+    if (isFormIncomplete) return;
 
     // record登録
-    const newRecord = { title: studySession, time: studyTime};
-    const newRecords = [...records, newRecord];
-    setRecords(newRecords);
+    const newRecord = { title: studySession, time: studyTime };
+    setRecords(prevRecords => [...prevRecords, newRecord]);
 
+    // フォームのリセット
     setStudySession("");
     setStudyTime(0);
-
-    // 合計時間計算
-    var sumTime = 0;
-    records.forEach((record) => {
-      sumTime += parseInt(record.time, 10);
-    });
-    setTotalTime(sumTime);
   };
 
-  // const isIncomplete = studySession === null || studyTime <= 0;
+  useEffect(() => {
+    // 合計時間計算
+    const sumTime = records.reduce((total, record) => total + record.time, 0);
+    setTotalTime(sumTime);
+  }, [records]);
 
   return (
     <>
       <h2>登録</h2>
-      <div>学習内容<input type="text" value={studySession} onChange={onChangeStudySession}/></div>
-      <div>学習時間<input type="number" value={studyTime} onChange={onChangeStudyTime}/>時間</div>
+      <div>学習内容<input type="text" value={studySession} onChange={onChangeStudySession} /></div>
+      <div>学習時間<input type="number" value={studyTime} onChange={onChangeStudyTime} />時間</div>
       <div>入力されている学習内容：{studySession}</div>
       <div>入力されている時間：{studyTime}時間</div>
       <button onClick={onClickSubmit}>登録</button>
@@ -63,4 +60,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
