@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import supabase from '../utils/supabaseClient'; // supabaseClient.js からインポート
+import supabase from '../utils/supabase';
 import './App.css'
 
 function App() {
