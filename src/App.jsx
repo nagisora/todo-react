@@ -1,8 +1,11 @@
+import React from 'react';
 import { useState, useEffect } from "react";
-import supabase from '../utils/supabase';
+import { getSupabase } from '../utils/supabase';
 import './App.css'
 
 function App() {
+
+  const supabase = getSupabase();
 
   const [records, setRecords] = useState([]);
   const [studySession, setStudySession] = useState("");
@@ -83,8 +86,25 @@ function App() {
   return (
     <>
       <h2>登録</h2>
-      <div>学習内容<input type="text" value={studySession} onChange={onChangeStudySession} /></div>
-      <div>学習時間<input type="number" value={studyTime} onChange={onChangeStudyTime} />時間</div>
+      <div>
+        <label htmlFor="content-input">学習内容</label>
+        <input
+          id="content-input"
+          type="text"
+          value={studySession}
+          onChange={onChangeStudySession}
+        />
+      </div>
+      <div>
+        <label htmlFor="time-input">学習時間</label>
+        <input
+          id="time-input"
+          type="number"
+          value={studyTime}
+          onChange={onChangeStudyTime}
+        />
+        時間
+      </div>
       <div>入力されている学習内容：{studySession}</div>
       <div>入力されている時間：{studyTime}時間</div>
       <button onClick={onClickSubmit}>登録</button>
