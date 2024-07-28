@@ -3,11 +3,11 @@ import { useState, useEffect } from "react";
 import { getSupabase } from '../utils/supabase';
 import './App.css'
 
+const supabase = getSupabase();
+
 function App() {
 
-  const supabase = getSupabase();
-
-  const [records, setRecords] = useState([]);
+  const [records, setRecords] = useState([]); // recordsの初期状態を空の配列に設定
   const [studySession, setStudySession] = useState("");
   const [studyTime, setStudyTime] = useState(0);
   const [totalTime, setTotalTime] = useState(0);
@@ -42,42 +42,35 @@ function App() {
   };
 
   const onClickDelete = async (index) => {
-    // Supabaseからレコードを削除
-    const { id } = records[index];
+    const recordToDelete = records[index];
     const { error } = await supabase
       .from('study-record')
       .delete()
-      .eq('id', id);
+      .eq('id', recordToDelete.id);
 
     if (error) {
-      console.error('Error deleting data:', error);
+      console.error('Error deleting record:', error);
     } else {
-      // ローカルのrecords状態からレコードを削除
       setRecords(prevRecords => prevRecords.filter((_, i) => i !== index));
     }
   };
 
   useEffect(() => {
     // 合計時間計算
-    const sumTime = records.reduce((total, record) => total + record.time, 0);
+    const sumTime = records ? records.reduce((total, record) => total + Number(record.time), 0) : 0;
     setTotalTime(sumTime);
   }, [records]);
 
   useEffect(() => {
-    // Supabaseからデータをフェッチ
     const fetchRecords = async () => {
-      setIsLoading(true); // ローディング状態を設定
-      const { data, error } = await supabase
-        .from('study-record')
-        .select('*');
-
+      setIsLoading(true);
+      const { data, error } = await supabase.from('study-record').select('*');
       if (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching records:', error);
       } else {
-        console.log('Fetched data:', data); // デバッグ用ログ
-        setRecords(data);
+        setRecords(data || []);
       }
-      setIsLoading(false); // ローディング状態を解除
+      setIsLoading(false);
     };
 
     fetchRecords();
@@ -112,15 +105,16 @@ function App() {
       <div>合計時間：{totalTime}/1000(h)</div>
       <hr/>
       <h2>一覧</h2>
-      { isLoading && "Loading..."}
-      <ul>
-        {records.map((record, index) => (
-          <li key={index}>
-            <span>{record.title}：{record.time}時間</span>
-            <button onClick={() => onClickDelete(index)}>削除</button>
-          </li>
-        ))}
-      </ul>
+      {isLoading ? "Loading..." : (
+        <ul>
+          {records && records.map((record, index) => (
+            <li key={index}>
+              <span>{record.title}：{record.time}時間</span>
+              <button onClick={() => onClickDelete(index)}>削除</button>
+            </li>
+          ))}
+        </ul>
+      )}
     </>
   )
 }
